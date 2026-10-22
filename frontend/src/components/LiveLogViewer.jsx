@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { GCP_SERVICES } from '../gcpServices';
 
 const SEVERITY_PATTERNS = {
   CRITICAL: /\b(500|out of memory|oom|fatal|panic|crash)\b/i,
@@ -24,6 +25,7 @@ const SEVERITY_COLORS = {
 
 const LiveLogViewer = ({ onAnalyzeWithAgent }) => {
   const [cloudProvider, setCloudProvider] = useState('azure'); // 'azure' or 'gcp'
+  const [gcpService, setGcpService] = useState('all');
   const [logs, setLogs] = useState([]);
   const [connected, setConnected] = useState(false);
   const [connecting, setConnecting] = useState(false);
@@ -38,6 +40,9 @@ const LiveLogViewer = ({ onAnalyzeWithAgent }) => {
   const eventSourceRef = useRef(null);
   const pausedLogsRef = useRef([]);
   const isPausedRef = useRef(false);
+  const reconnectTimerRef = useRef(null);
+  const generationRef = useRef(0);
+  const selectionQuery = `source=${cloudProvider}${cloudProvider === 'gcp' ? `&gcp_service=${gcpService}` : ''}`;
 
   // Keep isPausedRef in sync
   useEffect(() => {
@@ -60,30 +65,37 @@ const LiveLogViewer = ({ onAnalyzeWithAgent }) => {
 
   // Fetch status
   const fetchStatus = useCallback(async () => {
+    const generation = generationRef.current;
     try {
-      const res = await fetch(`http://127.0.0.1:5000/api/application/logs/status?source=${cloudProvider}`);
+      const res = await fetch(`http://127.0.0.1:5000/api/application/logs/status?${selectionQuery}`);
+      if (!res.ok) throw new Error(`Status request failed: ${res.status}`);
       const data = await res.json();
-      setStatus(data);
-    } catch {
-      setStatus(null);
+      if (generation === generationRef.current) setStatus(data);
+    } catch (error) {
+      console.error('Failed to fetch log stream status', error);
+      if (generation === generationRef.current) setStatus(null);
     }
-  }, [cloudProvider]);
+  }, [selectionQuery]);
 
   // Connect to SSE
   const connect = useCallback(() => {
+    clearTimeout(reconnectTimerRef.current);
+    const generation = ++generationRef.current;
     if (eventSourceRef.current) {
       eventSourceRef.current.close();
     }
 
     setConnecting(true);
-    const es = new EventSource(`http://127.0.0.1:5000/api/application/logs/stream?source=${cloudProvider}`);
+    const es = new EventSource(`http://127.0.0.1:5000/api/application/logs/stream?${selectionQuery}`);
 
     es.onopen = () => {
+      if (generation !== generationRef.current) return;
       setConnected(true);
       setConnecting(false);
     };
 
     es.onmessage = (event) => {
+      if (generation !== generationRef.current) return;
       const line = event.data;
       const entry = {
         id: Date.now() + Math.random(),
@@ -104,21 +116,24 @@ const LiveLogViewer = ({ onAnalyzeWithAgent }) => {
     };
 
     es.onerror = () => {
+      if (generation !== generationRef.current) return;
       setConnected(false);
       setConnecting(false);
       es.close();
       // Attempt reconnect after 3s
-      setTimeout(() => {
-        if (!eventSourceRef.current || eventSourceRef.current.readyState === EventSource.CLOSED) {
+      reconnectTimerRef.current = setTimeout(() => {
+        if (generation === generationRef.current) {
           connect();
         }
       }, 3000);
     };
 
     eventSourceRef.current = es;
-  }, [cloudProvider]);
+  }, [selectionQuery]);
 
   const disconnect = useCallback(() => {
+    generationRef.current += 1;
+    clearTimeout(reconnectTimerRef.current);
     if (eventSourceRef.current) {
       eventSourceRef.current.close();
       eventSourceRef.current = null;
@@ -130,6 +145,8 @@ const LiveLogViewer = ({ onAnalyzeWithAgent }) => {
   // Auto-connect on mount and whenever cloudProvider changes
   useEffect(() => {
     setLogs([]);
+    setStatus(null);
+    pausedLogsRef.current = [];
     connect();
     fetchStatus();
     const statusInterval = setInterval(fetchStatus, 10000);
@@ -137,7 +154,7 @@ const LiveLogViewer = ({ onAnalyzeWithAgent }) => {
       disconnect();
       clearInterval(statusInterval);
     };
-  }, [connect, disconnect, fetchStatus, cloudProvider]);
+  }, [connect, disconnect, fetchStatus]);
 
   // Auto-scroll when new logs arrive
   useEffect(() => {
@@ -208,8 +225,7 @@ const LiveLogViewer = ({ onAnalyzeWithAgent }) => {
               <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M13.05 4.24l-6.84 11.97 4.35 3.55 5.94-10.45-3.45-5.07zm1.75 3.06l3.4 5.95-4.47 6.51H24l-9.2-12.46zM0 19.76h9.11L4.35 15.7 0 19.76z"/></svg>
               Azure App Service
             </button>
-            {/* GCP toggle commented out for now so it doesn't disturb Azure */}
-            {/* <button
+            <button
               type="button"
               onClick={() => setCloudProvider('gcp')}
               style={{
@@ -227,17 +243,26 @@ const LiveLogViewer = ({ onAnalyzeWithAgent }) => {
                 color: cloudProvider === 'gcp' ? '#ffffff' : '#94a3b8',
                 boxShadow: cloudProvider === 'gcp' ? '0 1px 6px rgba(234, 67, 53, 0.4)' : 'none'
               }}
-              title="GCP Compute Engine VM Live Logs"
+              title="GCP Cloud Logging"
             >
               <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/></svg>
-              GCP Compute Engine
-            </button> */}
+              GCP
+            </button>
           </div>
+          {cloudProvider === 'gcp' && (
+            <select
+              aria-label="GCP log service"
+              value={gcpService}
+              onChange={(e) => setGcpService(e.target.value)}
+            >
+              {GCP_SERVICES.map(({ id, label }) => <option key={id} value={id}>{label}</option>)}
+            </select>
+          )}
 
           <div className={`connection-indicator ${connected ? 'connected' : connecting ? 'connecting' : 'disconnected'}`}>
             <span className="connection-dot"></span>
             <span className="connection-label">
-              {connected ? 'Live' : connecting ? 'Connecting...' : 'Disconnected'}
+              {connected && status?.connected ? 'Live' : connecting ? 'Connecting...' : connected ? 'Waiting for cloud logs' : 'Disconnected'}
             </span>
           </div>
 
@@ -253,6 +278,7 @@ const LiveLogViewer = ({ onAnalyzeWithAgent }) => {
               <span className="meta-chip">
                 Buffer: {status.buffer_size}
               </span>
+              {status.last_error && <span role="alert">{status.last_error}</span>}
             </div>
           )}
         </div>
@@ -314,7 +340,7 @@ const LiveLogViewer = ({ onAnalyzeWithAgent }) => {
             {onAnalyzeWithAgent && (
               <button 
                 className="log-action-btn"
-                onClick={() => onAnalyzeWithAgent(severityFilter, filter, cloudProvider)}
+                onClick={() => onAnalyzeWithAgent(severityFilter, filter, cloudProvider, gcpService)}
                 title="Send current filtered logs to Application Agent for deep analysis"
                 style={{
                   background: '#2368a0',

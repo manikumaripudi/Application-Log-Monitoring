@@ -4,6 +4,7 @@ import threading
 from services.azure_log_stream import log_stream_service
 from services.email_service import send_alert_email
 from config.settings import settings
+from prompts import LOG_ANALYSIS_INSTRUCTION, SEVERITY_INSTRUCTION
 
 MOCK_LOG_FILE = r"C:\Users\vtangeti\Desktop\poc\backend\mockdata\app1.log"
 
@@ -12,7 +13,7 @@ MOCK_LOG_FILE = r"C:\Users\vtangeti\Desktop\poc\backend\mockdata\app1.log"
 # Tool 1 — get_recent_application_logs
 # ---------------------------------------------------------------------------
 
-def get_recent_application_logs(minutes: Optional[int] = 10, source: Optional[str] = None) -> str:
+def get_recent_application_logs(minutes: Optional[int] = 10, source: Optional[str] = None, gcp_service: str = "all") -> str:
     """
     Retrieves the most recent application logs from Azure or GCP.
     """
@@ -24,7 +25,7 @@ def get_recent_application_logs(minutes: Optional[int] = 10, source: Optional[st
 
     if source and source.lower() == "gcp":
         from services.gcp_log_stream import gcp_log_stream_service
-        return gcp_log_stream_service.get_buffered_logs()
+        return gcp_log_stream_service.get_buffered_logs(gcp_service)
 
     # Default to Azure
     return log_stream_service.get_buffered_logs()
@@ -56,12 +57,7 @@ def detect_log_severity(log_line: str) -> Dict[str, str]:
     """
     return {
         "log_line": log_line.strip(),
-        "instruction": (
-            "Classify the severity of the above log line as one of: "
-            "CRITICAL, HIGH, MEDIUM, LOW, or INFO. "
-            "Base your decision on the semantic meaning of the log content — "
-            "not keywords. Then explain your reasoning in one sentence."
-        ),
+        "instruction": SEVERITY_INSTRUCTION,
     }
 
 
@@ -89,6 +85,10 @@ def analyze_application_logs(log_content: Optional[str] = None) -> Dict[str, Any
         log_content = get_recent_application_logs(source="azure")
     elif log_content.strip().lower() == "analyze:live:gcp":
         log_content = get_recent_application_logs(source="gcp")
+    elif log_content.strip().lower().startswith("analyze:live:gcp:"):
+        log_content = get_recent_application_logs(
+            source="gcp", gcp_service=log_content.strip().lower().split(":", 3)[3],
+        )
     elif os.path.isfile(log_content.strip()):
         with open(log_content.strip(), 'r', encoding='utf-8') as f:
             log_content = f.read()
@@ -108,21 +108,7 @@ def analyze_application_logs(log_content: Optional[str] = None) -> Dict[str, Any
     return {
         "total_lines": total_logs,
         "log_lines": numbered,
-        "instruction": (
-            "Analyze the log lines above. For each line that represents an issue "
-            "(ignore routine INFO lines), determine its severity semantically as "
-            "CRITICAL, HIGH, MEDIUM, LOW, or INFO — based on the meaning of the log, "
-            "not keywords. For each issue found provide: severity, issue_type, log_entry, "
-            "and a concrete remediation recommendation. "
-            "After analysis, if any CRITICAL or HIGH issues are found, call the "
-            "send_critical_alert tool with the list of issues (severity, issue_type, log_entry, remediation). "
-            "Your final response MUST NOT be a table. Format each issue as a clean paragraph block:\n\n"
-            "**Severity:** <CRITICAL/HIGH/MEDIUM/LOW>\n"
-            "**Issue Type:** <Brief Error Name>\n"
-            "**Log Entry:** `<Raw log line/snippet>`\n"
-            "**Remediation:** <Specific remediation recommendation>\n\n"
-            "Separate each issue with `---`. Do NOT use tables. Do NOT include extra headers or summaries."
-        ),
+        "instruction": LOG_ANALYSIS_INSTRUCTION,
     }
 
 

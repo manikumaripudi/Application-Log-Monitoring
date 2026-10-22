@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { GCP_SERVICES } from '../gcpServices';
 
 const SEV_COLOR = {
   CRITICAL: { text: '#ef4444', bg: 'rgba(239,68,68,0.1)',  border: 'rgba(239,68,68,0.3)'  },
@@ -206,6 +207,7 @@ const ApplicationAgent = ({ initialFilter }) => {
   const [loadingSessions, setLoadingSessions] = useState(new Set());
   const [mockFiles, setMockFiles] = useState([]);
   const [selectedFile, setSelectedFile] = useState('');
+  const [gcpService, setGcpService] = useState('all');
   const [severityFilter, setSeverityFilter] = useState('ALL');
   const [keywordFilter, setKeywordFilter] = useState('');
   const [isInitialized, setIsInitialized] = useState(false);
@@ -218,6 +220,7 @@ const ApplicationAgent = ({ initialFilter }) => {
       if (initialFilter.provider) {
         setSelectedFile(initialFilter.provider === 'gcp' ? 'live:gcp' : 'live:azure');
       }
+      if (initialFilter.gcpService) setGcpService(initialFilter.gcpService);
     }
   }, [initialFilter]);
 
@@ -343,6 +346,7 @@ const ApplicationAgent = ({ initialFilter }) => {
     try {
       const params = new URLSearchParams({ text: analyzePayload });
       params.append('cloud_provider', isGcpLive ? 'gcp' : 'azure');
+      if (isGcpLive) params.append('gcp_service', gcpService);
 
       if (severityFilter && severityFilter !== 'ALL') {
         params.append('severity_filter', severityFilter);
@@ -471,8 +475,8 @@ const ApplicationAgent = ({ initialFilter }) => {
                 }}
                 title="Select Log Source"
               >
-                <option value="live:azure">Live Logs</option>
-                {/* <option value="live:gcp">GCP Live Logs (Compute Engine)</option> */}
+                <option value="live:azure">Azure Live Logs</option>
+                <option value="live:gcp">GCP Live Logs</option>
                 {mockFiles.length > 0 && (
                   <optgroup label="Mock Files">
                     {mockFiles.map(file => (
@@ -481,6 +485,15 @@ const ApplicationAgent = ({ initialFilter }) => {
                   </optgroup>
                 )}
               </select>
+              {selectedFile === 'live:gcp' && (
+                <select
+                  aria-label="GCP analysis service"
+                  value={gcpService}
+                  onChange={(e) => setGcpService(e.target.value)}
+                >
+                  {GCP_SERVICES.map(({ id, label }) => <option key={id} value={id}>{label}</option>)}
+                </select>
+              )}
 
               {/* Severity Filter Dropdown - right next to Live Logs */}
               <select

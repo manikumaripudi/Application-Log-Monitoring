@@ -19,17 +19,30 @@ class Settings(BaseSettings):
     LOG_SOURCE: str = "azure"  # "azure" or "gcp" or "mock"
     AZURE_OPENAI_DEPLOYMENT: Optional[str] = None  # Azure OpenAI deployment name for LLM tools
 
-    # GCP Compute Engine Log Stream Settings
+    # GCP Cloud Logging settings
     GCP_PROJECT_ID: Optional[str] = None
     GCP_INSTANCE_ID: Optional[str] = None
     GCP_ZONE: Optional[str] = None
-    GCP_LOG_FILTER: str = 'resource.type="gce_instance"'
+    GCP_LOG_FILTER: str = ""
     GOOGLE_APPLICATION_CREDENTIALS: Optional[str] = None
 
     # Gemini / Model Settings
     GEMINI_API_KEY: Optional[str] = None
     GOOGLE_API_KEY: Optional[str] = None
     MODEL_NAME: str = "azure/gpt-5.6-terra"
+
+    WEB_SEARCH_ENABLED: bool = True
+    WEB_SEARCH_MODEL: str = "gemini-2.5-flash"
+
+    CODEBASE_ACCESS_ENABLED: bool = False
+    AZURE_CODEBASE_PATH: Optional[str] = None  # Kudu VFS path, e.g. site/wwwroot
+    GCP_CODEBASE_PATH: Optional[str] = None  # Absolute path on the VM
+    GCP_CODEBASE_SSH_HOST: Optional[str] = None
+    GCP_CODEBASE_SSH_PORT: int = 22
+    GCP_CODEBASE_SSH_USER: Optional[str] = None
+    GCP_CODEBASE_SSH_KEY_FILE: Optional[str] = None
+    GCP_CODEBASE_SSH_KEY_PASSPHRASE: Optional[str] = None
+    GCP_CODEBASE_KNOWN_HOSTS: Optional[str] = None
 
     # Email alert settings
     SMTP_HOST: str = "smtp.gmail.com"

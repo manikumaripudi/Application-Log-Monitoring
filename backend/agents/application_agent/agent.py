@@ -35,38 +35,24 @@ from tools.application_log_tools import (
     detect_log_severity,
     send_critical_alert,
 )
+from tools.web_search import WEB_SEARCH_INSTRUCTION, get_web_search_tools
+from prompts import APPLICATION_AGENT_INSTRUCTION
+from tools.codebase_tools import CODEBASE_INSTRUCTION, get_codebase_tools
+
+search_tools = get_web_search_tools()
+codebase_tools = get_codebase_tools()
 
 root_agent = Agent(
     name="application_agent",
     model=MODEL_NAME,
     description=(
-        "Specialized Application Agent that ingests application logs, "
-        "detects server issues and errors, and formulates remediation actions."
+        "Application Reliability Agent that adapts to the monitored workload and "
+        "log formats, detects issues, and formulates evidence-based remediation."
     ),
     instruction=(
-        "You are an Application Reliability Agent. Your job is to analyze application logs, "
-        "determine severity of issues, and alert the team when needed.\n\n"
-        "Workflow:\n"
-        "1. Use `get_recent_application_logs` to fetch logs if none are provided.\n"
-        "2. Use `analyze_application_logs` to get the raw log lines.\n"
-        "3. Read each log line carefully and use YOUR OWN judgment to classify severity as "
-        "CRITICAL, HIGH, MEDIUM, LOW, or INFO — based on the semantic meaning of the log. "
-        "Do NOT rely on keyword matching. Understand what the log is saying.\n"
-        "4. If a user asks about a single log line's severity, use `detect_log_severity` — "
-        "it will return the log line and you then classify it semantically.\n"
-        "5. After identifying all CRITICAL and HIGH issues, call `send_critical_alert` "
-        "with the list of issues containing keys: severity, issue_type, log_entry, remediation.\n"
-        "6. Final Response Format:\n"
-        "   Your final response MUST NOT be a table. Format each identified issue as a clean paragraph block:\n\n"
-        "   **Severity:** <CRITICAL/HIGH/MEDIUM/LOW>\n"
-        "   **Issue Type:** <Brief Error Name>\n"
-        "   **Log Entry:** `<Raw log line/snippet>`\n"
-        "   **Remediation:** <Specific remediation recommendation>\n\n"
-        "   Separate multiple issues with `---`.\n\n"
-        "STRICT CONSTRAINTS:\n"
-        "- Do NOT use tables. Output ONLY paragraph blocks.\n"
-        "- Do NOT add any preamble, greeting, or 'Log analysis summary' headers.\n"
-        "- Do NOT include 'Operational impact' or any trailing summary paragraphs."
+        APPLICATION_AGENT_INSTRUCTION
+        + (WEB_SEARCH_INSTRUCTION if search_tools else "")
+        + (CODEBASE_INSTRUCTION if codebase_tools else "")
     ),
-    tools=[get_recent_application_logs, analyze_application_logs, detect_log_severity, send_critical_alert]
+    tools=[get_recent_application_logs, analyze_application_logs, detect_log_severity, send_critical_alert, *search_tools, *codebase_tools]
 )

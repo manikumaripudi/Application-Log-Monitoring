@@ -3,6 +3,7 @@ from typing import Dict, Any, Optional
 
 from services.azure_log_stream import log_stream_service as azure_service
 from services.gcp_log_stream import gcp_log_stream_service as gcp_service
+from config.settings import settings
 
 logger = logging.getLogger(__name__)
 
@@ -40,12 +41,12 @@ class LogStreamManager:
         except Exception as e:
             logger.error(f"Failed to start Azure log stream: {e}")
 
-        # GCP stream startup is commented out for now so it doesn't disturb Azure
-        # logger.info("LogStreamManager: Starting GCP log stream...")
-        # try:
-        #     await self.gcp.start()
-        # except Exception as e:
-        #     logger.error(f"Failed to start GCP log stream: {e}")
+        if settings.GCP_PROJECT_ID and settings.LOG_SOURCE != "mock":
+            logger.info("LogStreamManager: Starting GCP log stream...")
+            try:
+                await self.gcp.start()
+            except Exception as e:
+                logger.error(f"Failed to start GCP log stream: {e}")
 
     async def stop_all(self):
         """Stops all background log streaming tasks."""

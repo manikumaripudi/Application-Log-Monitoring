@@ -7,7 +7,7 @@ import logging
 from contextlib import asynccontextmanager
 from pydantic import BaseModel
 import re
-from typing import List, Dict, Any, Optional
+from typing import Annotated, List, Dict, Any, Optional
 
 from google.adk.runners import Runner
 from google.adk.sessions.in_memory_session_service import InMemorySessionService
@@ -20,6 +20,8 @@ from services.azure_log_stream import log_stream_service
 from services.log_stream_manager import log_stream_manager
 from api.log_stream import router as log_stream_router
 from tools.application_log_tools import MOCK_LOG_FILE
+from config.settings import settings
+from services.gcp_services import GcpService, service_label
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
@@ -51,12 +53,28 @@ app_runner = Runner(
     auto_create_session=True
 )
 
-def run_agent_sync(runner, text):
+def run_agent_sync(runner, text, cloud_provider=None, gcp_service="all"):
     session_id = str(uuid.uuid4())
+    if settings.CODEBASE_ACCESS_ENABLED:
+        # Routing is trusted session state, not a tool argument chosen by the model.
+        cloud = cloud_provider
+        if cloud is None:
+            cloud = (
+                "gcp" if text == "analyze:live:gcp" else
+                "azure" if text in ("analyze", "analyze:live", "analyze:live:azure") else
+                "unknown"
+            )
+        asyncio.run(runner.session_service.create_session(
+            app_name=runner.app_name, user_id="default_user", session_id=session_id,
+            state={"monitoring_cloud": cloud, "monitoring_gcp_service": gcp_service},
+        ))
     if text.startswith("analyze:"):
         payload = text.split(":", 1)[1]
         if payload == "live:gcp":
-            prompt_text = "Please analyze the GCP Compute Engine live application logs. Call the analyze_application_logs tool with log_content='analyze:live:gcp'."
+            prompt_text = (
+                f"Please analyze GCP {service_label(gcp_service)} logs. "
+                f"Call analyze_application_logs with log_content='analyze:live:gcp:{gcp_service}'."
+            )
         elif payload in ("live", "live:azure"):
             prompt_text = "Please analyze the Azure App Service live application logs. Call the analyze_application_logs tool with log_content='analyze:live:azure'."
         else:
@@ -147,7 +165,9 @@ async def analyze_application(
     severity_filter: Optional[str] = Form(None),
     keyword_filter: Optional[str] = Form(None),
     cloud_provider: Optional[str] = Form(None),
+    gcp_service: Annotated[GcpService, Form()] = "all",
 ):
+    service_label(gcp_service)
     try:
         from tools.application_log_tools import get_recent_application_logs
         
@@ -161,8 +181,8 @@ async def analyze_application(
             with open(filepath, 'r', encoding='utf-8') as f:
                 raw_logs = f.read()
         elif is_gcp_live:
-            source_name = "GCP Live Logs"
-            raw_logs = get_recent_application_logs(source="gcp")
+            source_name = f"GCP Live Logs - {service_label(gcp_service)}"
+            raw_logs = get_recent_application_logs(source="gcp", gcp_service=gcp_service)
         else:
             source_name = "Azure Live Logs"
             raw_logs = get_recent_application_logs(source="azure")
@@ -177,6 +197,12 @@ async def analyze_application(
         has_filter = bool(filter_parts)
         filter_label = f" [{', '.join(filter_parts)}]" if has_filter else ""
         file_name = f"{source_name}{filter_label}"
+        if is_gcp_live and not raw_logs.strip():
+            return {
+                "response": f"No buffered logs are available for {source_name}. Check Cloud Logging configuration and connection status.",
+                "file_name": file_name,
+                "analyzed_logs": "",
+            }
 
         # Apply filtering
         if has_filter:
@@ -191,9 +217,18 @@ async def analyze_application(
             agent_input = f"Please analyze these filtered logs ({', '.join(filter_parts)}):\n{filtered_logs}"
         else:
             analyzed_logs = raw_logs
-            agent_input = text
+            agent_input = text if is_mock else (
+                "analyze:live:gcp" if is_gcp_live else "analyze:live:azure"
+            )
+        if is_gcp_live:
+            # Analyze the selected snapshot, not a newer or differently scoped buffer.
+            agent_input = (
+                f"Analyze these supplied GCP {service_label(gcp_service)} logs only; "
+                f"do not fetch other live logs:\n{analyzed_logs}"
+            )
 
-        response = await asyncio.to_thread(run_agent_sync, app_runner, agent_input)
+        selected_cloud = "mock" if is_mock else ("gcp" if is_gcp_live else "azure")
+        response = await asyncio.to_thread(run_agent_sync, app_runner, agent_input, selected_cloud, gcp_service)
         return {"response": response, "file_name": file_name, "analyzed_logs": analyzed_logs}
     except Exception as e:
         import traceback

@@ -8,11 +8,12 @@ function App() {
   const [activeTab, setActiveTab] = useState('logs');
   const [initialFilter, setInitialFilter] = useState(null);
 
-  const handleAnalyzeFromLiveLogs = (severity, keyword, provider = 'azure') => {
+  const handleAnalyzeFromLiveLogs = (severity, keyword, provider = 'azure', gcpService = 'all') => {
     setInitialFilter({
       severity: severity || 'ALL',
       keyword: keyword || '',
       provider: provider || 'azure',
+      gcpService,
       timestamp: Date.now()
     });
     setActiveTab('agent');
@@ -59,4 +60,3 @@ function App() {
 }
 
 export default App;
-
