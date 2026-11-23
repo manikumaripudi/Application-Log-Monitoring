@@ -1,0 +1,275 @@
+2026-10-05 00:00:18 ERROR c.m.d.s.NetMapNodeServiceImpl - No Data found from DB to write in excel file
+2026-10-05 00:00:18 ERROR c.m.d.s.NetMapNodeServiceImpl - Read operation failed, Excel file is not found in location /app/ICC/portal/RegionalNetmapUpdate/netMapNodesData.xlsx
+2026-10-05 00:00:18 ERROR c.m.d.s.NetMapNodeServiceImpl - File not found to read
+2026-10-05 00:00:18 ERROR c.m.d.s.NetMapNodeServiceImpl - Failed to rename Excel File
+2026-10-05 00:00:18 ERROR c.m.d.s.NetMapNodeServiceImpl - Error while moving Excel file into the backup folder
+2026-10-05 01:00:01 ERROR c.m.d.serviceimpl.MarketSegmentApi - error occured at marketSegmentApiCall  
+org.springframework.web.client.HttpClientErrorException$BadRequest: 400 Bad Request on GET request for "https://MDMNextService.mcd.com/Api/MDMNextSubscription/SubscriptionID=HISCJ0XSYD": ""No active Subscription found for this Subscription ID""
+	at org.springframework.web.client.HttpClientErrorException.create(HttpClientErrorException.java:103)
+	at org.springframework.web.client.DefaultResponseErrorHandler.handleError(DefaultResponseErrorHandler.java:186)
+	at org.springframework.web.client.DefaultResponseErrorHandler.handleError(DefaultResponseErrorHandler.java:147)
+	at org.springframework.web.client.RestTemplate.handleResponse(RestTemplate.java:953)
+	at org.springframework.web.client.RestTemplate.doExecute(RestTemplate.java:902)
+	at org.springframework.web.client.RestTemplate.execute(RestTemplate.java:801)
+	at org.springframework.web.client.RestTemplate.exchange(RestTemplate.java:683)
+	at com.mss.dmaas.serviceimpl.MarketSegmentApi.marketSegmentApiCall(MarketSegmentApi.java:117)
+	at com.mss.dmaas.serviceimpl.MarketSegmentApi.updateMarketSegmentDataDB(MarketSegmentApi.java:156)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.runInternal(ScheduledMethodRunnable.java:130)
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.lambda$run$2(ScheduledMethodRunnable.java:124)
+	at io.micrometer.observation.Observation.observe(Observation.java:498)
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:124)
+	at org.springframework.scheduling.config.Task$OutcomeTrackingRunnable.run(Task.java:85)
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)
+	at org.springframework.scheduling.concurrent.ReschedulingRunnable.run(ReschedulingRunnable.java:96)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:304)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2026-10-05 01:00:02 ERROR c.m.d.serviceimpl.MarketSegmentApi - error occured at updateSegmentCategoryName
+org.springframework.jdbc.BadSqlGrammarException: StatementCallback; bad SQL grammar [select SNo,SegmentCategory,ActiveRestaurantsCount,CountryCode,CountryMarketIndicator,CountryName,MarketCode,MarketName,SegmentName from DMAAS_MARKET_SEGMENT ]
+	at org.springframework.jdbc.support.SQLExceptionSubclassTranslator.doTranslate(SQLExceptionSubclassTranslator.java:103)
+	at org.springframework.jdbc.support.AbstractFallbackSQLExceptionTranslator.translate(AbstractFallbackSQLExceptionTranslator.java:107)
+	at org.springframework.jdbc.core.JdbcTemplate.translateException(JdbcTemplate.java:1556)
+	at org.springframework.jdbc.core.JdbcTemplate.execute(JdbcTemplate.java:408)
+	at org.springframework.jdbc.core.JdbcTemplate.query(JdbcTemplate.java:476)
+	at org.springframework.jdbc.core.JdbcTemplate.query(JdbcTemplate.java:486)
+	at com.mss.dmaas.serviceimpl.MarketSegmentApi.updateSegmentCategoryName(MarketSegmentApi.java:192)
+	at com.mss.dmaas.serviceimpl.MarketSegmentApi.updateMarketSegmentDataDB(MarketSegmentApi.java:167)
+	... 15 common frames omitted
+Caused by: java.sql.SQLSyntaxErrorException: ORA-00942: table or view does not exist
+	at oracle.jdbc.driver.T4CTTIoer11.processError(T4CTTIoer11.java:509)
+	at oracle.jdbc.driver.T4CTTIoer11.processError(T4CTTIoer11.java:461)
+	at oracle.jdbc.driver.T4C8Oall.processError(T4C8Oall.java:1104)
+	at oracle.jdbc.driver.T4CTTIfun.receive(T4CTTIfun.java:553)
+	at oracle.jdbc.driver.T4CTTIfun.doRPC(T4CTTIfun.java:269)
+	at oracle.jdbc.driver.T4C8Oall.doOALL(T4C8Oall.java:655)
+	at oracle.jdbc.driver.T4CStatement.doOall8(T4CStatement.java:229)
+	at oracle.jdbc.driver.T4CStatement.doOall8(T4CStatement.java:41)
+	at oracle.jdbc.driver.T4CStatement.executeForDescribe(T4CStatement.java:765)
+	at oracle.jdbc.driver.OracleStatement.executeMaybeDescribe(OracleStatement.java:983)
+	at oracle.jdbc.driver.OracleStatement.doExecuteWithTimeout(OracleStatement.java:1168)
+	at oracle.jdbc.driver.OracleStatement.executeQuery(OracleStatement.java:1362)
+	at oracle.jdbc.driver.OracleStatementWrapper.executeQuery(OracleStatementWrapper.java:369)
+	at org.springframework.jdbc.core.JdbcTemplate$1QueryStatementCallback.doInStatement(JdbcTemplate.java:463)
+	at org.springframework.jdbc.core.JdbcTemplate.execute(JdbcTemplate.java:393)
+	... 19 common frames omitted
+Caused by: oracle.jdbc.OracleDatabaseException: ORA-00942: table or view does not exist
+	at oracle.jdbc.driver.T4CTTIoer11.processError(T4CTTIoer11.java:513)
+	... 37 common frames omitted
+2026-10-05 01:00:02 ERROR c.m.d.s.NetMapNodeServiceImpl - No Data found from DB to write in excel file
+2026-10-05 01:00:02 ERROR c.m.d.s.NetMapNodeServiceImpl - Read operation failed, Excel file is not found in location /app/ICC/portal/RegionalNetmapUpdate/netMapNodesData.xlsx
+2026-10-05 01:00:02 ERROR c.m.d.s.NetMapNodeServiceImpl - File not found to read
+2026-10-05 01:00:02 ERROR c.m.d.s.NetMapNodeServiceImpl - Failed to rename Excel File
+2026-10-05 01:00:02 ERROR c.m.d.s.NetMapNodeServiceImpl - Error while moving Excel file into the backup folder
+2026-10-05 02:00:00 ERROR c.m.d.s.NetMapNodeServiceImpl - No Data found from DB to write in excel file
+2026-10-05 02:00:00 ERROR c.m.d.s.NetMapNodeServiceImpl - Read operation failed, Excel file is not found in location /app/ICC/portal/RegionalNetmapUpdate/netMapNodesData.xlsx
+2026-10-05 02:00:00 ERROR c.m.d.s.NetMapNodeServiceImpl - File not found to read
+2026-10-05 02:00:00 ERROR c.m.d.s.NetMapNodeServiceImpl - Failed to rename Excel File
+2026-10-05 02:00:00 ERROR c.m.d.s.NetMapNodeServiceImpl - Error while moving Excel file into the backup folder
+2026-10-05 03:00:00 ERROR c.m.d.s.NetMapNodeServiceImpl - No Data found from DB to write in excel file
+2026-10-05 03:00:00 ERROR c.m.d.s.NetMapNodeServiceImpl - Read operation failed, Excel file is not found in location /app/ICC/portal/RegionalNetmapUpdate/netMapNodesData.xlsx
+2026-10-05 03:00:00 ERROR c.m.d.s.NetMapNodeServiceImpl - File not found to read
+2026-10-05 03:00:00 ERROR c.m.d.s.NetMapNodeServiceImpl - Failed to rename Excel File
+2026-10-05 03:00:00 ERROR c.m.d.s.NetMapNodeServiceImpl - Error while moving Excel file into the backup folder
+2026-10-05 03:34:18 ERROR c.m.d.s.DashboardStoreHealthStatusServiceImpl - Exception while fetching data for region APMEA and table EDS
+org.springframework.jdbc.BadSqlGrammarException: PreparedStatementCallback; bad SQL grammar [SELECT COALESCE(SUM(CASE WHEN UPPER(STATUS) IN ('READY','UP') THEN STORE_NUMBER_COUNT ELSE 0 END),0) AS HEALTHY_STORES, COALESCE(SUM(CASE WHEN UPPER(STATUS) IN ('PAUSED','PAUSE') THEN STORE_NUMBER_COUNT ELSE 0 END),0) AS PAUSED_COUNT, COALESCE(SUM(CASE WHEN UPPER(STATUS) IN ('NEVER_CONTACTED','SHUNNED','DOWN','NETWORK_ERROR') THEN STORE_NUMBER_COUNT ELSE 0 END),0) AS UNHEALTHY_STORES FROM VW_STORE_HEALTH_REGION WHERE REGION_CODE = ?  AND CLIENT_TYPE NOT IN ('MHO','LAB')  AND MIGRATION_STATUS NOT IN ('CLOSED','PAUSE','NEW')]
+	at org.springframework.jdbc.support.SQLExceptionSubclassTranslator.doTranslate(SQLExceptionSubclassTranslator.java:103)
+	at org.springframework.jdbc.support.AbstractFallbackSQLExceptionTranslator.translate(AbstractFallbackSQLExceptionTranslator.java:107)
+	at org.springframework.jdbc.core.JdbcTemplate.translateException(JdbcTemplate.java:1556)
+	at org.springframework.jdbc.core.JdbcTemplate.execute(JdbcTemplate.java:677)
+	at org.springframework.jdbc.core.JdbcTemplate.query(JdbcTemplate.java:723)
+	at org.springframework.jdbc.core.JdbcTemplate.query(JdbcTemplate.java:754)
+	at org.springframework.jdbc.core.JdbcTemplate.query(JdbcTemplate.java:767)
+	at org.springframework.jdbc.core.JdbcTemplate.queryForObject(JdbcTemplate.java:889)
+	at com.mss.dmaas.serviceimpl.DashboardStoreHealthStatusServiceImpl.getRegionTableCounts(DashboardStoreHealthStatusServiceImpl.java:598)
+	at com.mss.dmaas.serviceimpl.DashboardStoreHealthStatusServiceImpl.getStoreHealthStatusReportForRegionGroup(DashboardStoreHealthStatusServiceImpl.java:551)
+	at com.mss.dmaas.controller.DashboardStoreHealthStatusController.getStoreHealthStatusReportForRegionGroup(DashboardStoreHealthStatusController.java:154)
+	... [112 Spring/Security/Tomcat servlet filter frames trimmed] ...
+Caused by: java.sql.SQLSyntaxErrorException: ORA-00932: inconsistent datatypes: expected CHAR got NUMBER
+	at oracle.jdbc.driver.T4CTTIoer11.processError(T4CTTIoer11.java:509)
+	at oracle.jdbc.driver.T4CTTIoer11.processError(T4CTTIoer11.java:461)
+	at oracle.jdbc.driver.T4C8Oall.processError(T4C8Oall.java:1104)
+	at oracle.jdbc.driver.T4CTTIfun.receive(T4CTTIfun.java:553)
+	at oracle.jdbc.driver.T4CTTIfun.doRPC(T4CTTIfun.java:269)
+	at oracle.jdbc.driver.T4C8Oall.doOALL(T4C8Oall.java:655)
+	at oracle.jdbc.driver.T4CPreparedStatement.doOall8(T4CPreparedStatement.java:270)
+	at oracle.jdbc.driver.T4CPreparedStatement.doOall8(T4CPreparedStatement.java:91)
+	at oracle.jdbc.driver.T4CPreparedStatement.executeForDescribe(T4CPreparedStatement.java:807)
+	at oracle.jdbc.driver.OracleStatement.executeMaybeDescribe(OracleStatement.java:983)
+	at oracle.jdbc.driver.OracleStatement.doExecuteWithTimeout(OracleStatement.java:1168)
+	at oracle.jdbc.driver.OraclePreparedStatement.executeInternal(OraclePreparedStatement.java:3666)
+	at oracle.jdbc.driver.T4CPreparedStatement.executeInternal(T4CPreparedStatement.java:1426)
+	at oracle.jdbc.driver.OraclePreparedStatement.executeQuery(OraclePreparedStatement.java:3713)
+	at oracle.jdbc.driver.OraclePreparedStatementWrapper.executeQuery(OraclePreparedStatementWrapper.java:1167)
+	at org.springframework.jdbc.core.JdbcTemplate$1.doInPreparedStatement(JdbcTemplate.java:732)
+	at org.springframework.jdbc.core.JdbcTemplate.execute(JdbcTemplate.java:658)
+	... 122 common frames omitted
+Caused by: oracle.jdbc.OracleDatabaseException: ORA-00932: inconsistent datatypes: expected CHAR got NUMBER
+	at oracle.jdbc.driver.T4CTTIoer11.processError(T4CTTIoer11.java:513)
+	... 142 common frames omitted
+2026-10-05 03:34:24 ERROR c.m.d.s.AppServerHealthStatusServiceImpl - Exception in getAppServerHealthStatusReportForRegion method
+org.springframework.jdbc.BadSqlGrammarException: PreparedStatementCallback; bad SQL grammar [SELECT PRIMARY_SERVER_TYPE, STATUS, COUNT(node_name) AS "APPSERVERS_COUNT" FROM (WITH FirstTable AS (     SELECT DISTINCT         DS.HOST_NAME,         DS.IP_ADDRESS,         DS.REGION_CODE,         DS.NODE_NAME,         DS.ACTIVATED_DATE,         CASE WHEN TRIM(CS.STATUS) IN ('READY', 'UP') THEN 1 ELSE 0 END AS HEALTH_STATUS,         CS.MODIFICATION_DATE,         CS.STATUS AS STATUS,         CASE             WHEN PRIMARY_SERVER_TYPE IN ('SFG', 'WTX', 'ICC', 'MQ', 'CD') THEN 'APP SERVER'             WHEN PRIMARY_SERVER_TYPE IN ('GBL', 'AS4', 'APP') THEN 'CORPORATE SERVER'             WHEN PRIMARY_SERVER_TYPE IN ('MHO') THEN 'MHOS'         END AS PRIMARY_SERVER_TYPE,         CASE WHEN FA.STATUS IS NULL THEN 'SNMP Listener Error' ELSE FA.STATUS END AS FA_HEALTH_STATUS,         FA.LAST_COMMUNICATION AS FA_LAST_CHECKED     FROM CC2NAPRD.CC_SERVER CS     JOIN DMAAS_LK_SERVER DS ON CS.NAME = DS.NODE_NAME     LEFT JOIN STORE_FA_HEALTH_STATUS FA ON DS.NODE_NAME = FA.NODE_NAME     WHERE CS.LOGICALLY_DELETED != 1       AND CS.NODE_TYPE_ID IN (1, 3, 7) ), SecondTable AS (     SELECT DISTINCT         DS.HOST_NAME,         DS.IP_ADDRESS,         DS.REGION_CODE,         DS.NODE_NAME,         DS.ACTIVATED_DATE,         CASE             WHEN (CS.CD_STATUS IN ('Running', 'UP') AND CS.LAST_UPDATED_TS <= SYSDATE - INTERVAL '25' MINUTE)                  OR CD_STATUS IS NULL THEN 0             ELSE 1         END AS HEALTH_STATUS,         CS.LAST_UPDATED_TS AS MODIFICATION_DATE,         CASE             WHEN TRIM(CS.CD_STATUS) IS NULL THEN 'NEVER_CONTACTED'             WHEN CS.LAST_UPDATED_TS <= SYSDATE - INTERVAL '25' MINUTE THEN 'DOWN'             ELSE TRIM(CS.CD_STATUS)         END AS STATUS,         CASE             WHEN PRIMARY_SERVER_TYPE IN ('SFG', 'WTX', 'ICC', 'MQ', 'CD') THEN 'APP SERVER'             WHEN PRIMARY_SERVER_TYPE IN ('GBL', 'AS4', 'APP') THEN 'CORPORATE SERVER'             WHEN PRIMARY_SERVER_TYPE IN ('MHO') THEN 'MHOS'         END AS PRIMARY_SERVER_TYPE,         CASE WHEN CS.FA_STATUS IS NULL THEN 'SNMP Listener Error' ELSE CS.FA_STATUS END AS FA_HEALTH_STATUS,         CS.LAST_UPDATED_TS AS FA_LAST_CHECKED     FROM DMAAS_CD_HEALTH_STATUS CS     JOIN DMAAS_LK_SERVER DS ON CS.NODENAME = DS.NODE_NAME ) SELECT     COALESCE(ft.HOST_NAME, st.HOST_NAME) AS HOST_NAME,     COALESCE(ft.IP_ADDRESS, st.IP_ADDRESS) AS IP_ADDRESS,     COALESCE(ft.PRIMARY_SERVER_TYPE, st.PRIMARY_SERVER_TYPE) AS PRIMARY_SERVER_TYPE,     COALESCE(ft.NODE_NAME, st.NODE_NAME) AS NODE_NAME,     CASE         WHEN ft.STATUS = 'READY' THEN ft.HEALTH_STATUS         WHEN ft.STATUS != 'READY' AND (st.STATUS = 'UP' OR st.STATUS = 'READY') THEN 1         WHEN ft.STATUS != 'READY' AND st.STATUS IS NOT NULL THEN st.HEALTH_STATUS         ELSE ft.HEALTH_STATUS     END AS HEALTH_STATUS,     CASE         WHEN ft.STATUS = 'READY' THEN ft.STATUS         WHEN ft.STATUS != 'READY' AND (st.STATUS = 'UP' OR st.STATUS = 'READY') THEN 'READY'         WHEN ft.STATUS != 'READY' AND st.STATUS IS NOT NULL THEN st.STATUS         ELSE ft.STATUS     END AS STATUS,     COALESCE(ft.MODIFICATION_DATE, st.MODIFICATION_DATE) AS MODIFICATION_DATE,     COALESCE(ft.FA_HEALTH_STATUS, st.FA_HEALTH_STATUS) AS FA_HEALTH_STATUS,     COALESCE(ft.FA_LAST_CHECKED, st.FA_LAST_CHECKED) AS FA_LAST_CHECKED,     CASE         WHEN ft.NODE_NAME IS NOT NULL AND st.NODE_NAME IS NULL THEN 'CD'         WHEN st.NODE_NAME IS NOT NULL AND ft.NODE_NAME IS NULL THEN 'API'         WHEN ft.NODE_NAME IS NOT NULL AND st.NODE_NAME IS NOT NULL THEN 'API'         ELSE NULL     END AS HEALTH_TOOL FROM FirstTable ft FULL OUTER JOIN SecondTable st     ON ft.NODE_NAME = st.NODE_NAME WHERE ft.PRIMARY_SERVER_TYPE=?) GROUP BY PRIMARY_SERVER_TYPE, STATUS]
+	at org.springframework.jdbc.support.SQLExceptionSubclassTranslator.doTranslate(SQLExceptionSubclassTranslator.java:103)
+	at org.springframework.jdbc.support.AbstractFallbackSQLExceptionTranslator.translate(AbstractFallbackSQLExceptionTranslator.java:107)
+	at org.springframework.jdbc.core.JdbcTemplate.translateException(JdbcTemplate.java:1556)
+	at org.springframework.jdbc.core.JdbcTemplate.execute(JdbcTemplate.java:677)
+	at org.springframework.jdbc.core.JdbcTemplate.query(JdbcTemplate.java:723)
+	at org.springframework.jdbc.core.JdbcTemplate.query(JdbcTemplate.java:754)
+	at org.springframework.jdbc.core.JdbcTemplate.query(JdbcTemplate.java:767)
+	at org.springframework.jdbc.core.JdbcTemplate.query(JdbcTemplate.java:820)
+	at com.mss.dmaas.serviceimpl.AppServerHealthStatusServiceImpl.getAppServerHealthStatusReport(AppServerHealthStatusServiceImpl.java:767)
+	at com.mss.dmaas.serviceimpl.AppServerHealthStatusServiceImpl.lambda$getCompleteDashboard$2(AppServerHealthStatusServiceImpl.java:1501)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1768)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+Caused by: java.sql.SQLSyntaxErrorException: ORA-00942: table or view does not exist
+	at oracle.jdbc.driver.T4CTTIoer11.processError(T4CTTIoer11.java:509)
+	at oracle.jdbc.driver.T4CTTIoer11.processError(T4CTTIoer11.java:461)
+	at oracle.jdbc.driver.T4C8Oall.processError(T4C8Oall.java:1104)
+	at oracle.jdbc.driver.T4CTTIfun.receive(T4CTTIfun.java:553)
+	at oracle.jdbc.driver.T4CTTIfun.doRPC(T4CTTIfun.java:269)
+	at oracle.jdbc.driver.T4C8Oall.doOALL(T4C8Oall.java:655)
+	at oracle.jdbc.driver.T4CPreparedStatement.doOall8(T4CPreparedStatement.java:270)
+	at oracle.jdbc.driver.T4CPreparedStatement.doOall8(T4CPreparedStatement.java:91)
+	at oracle.jdbc.driver.T4CPreparedStatement.executeForDescribe(T4CPreparedStatement.java:807)
+	at oracle.jdbc.driver.OracleStatement.executeMaybeDescribe(OracleStatement.java:983)
+	at oracle.jdbc.driver.OracleStatement.doExecuteWithTimeout(OracleStatement.java:1168)
+	at oracle.jdbc.driver.OraclePreparedStatement.executeInternal(OraclePreparedStatement.java:3666)
+	at oracle.jdbc.driver.T4CPreparedStatement.executeInternal(T4CPreparedStatement.java:1426)
+	at oracle.jdbc.driver.OraclePreparedStatement.executeQuery(OraclePreparedStatement.java:3713)
+	at oracle.jdbc.driver.OraclePreparedStatementWrapper.executeQuery(OraclePreparedStatementWrapper.java:1167)
+	at org.springframework.jdbc.core.JdbcTemplate$1.doInPreparedStatement(JdbcTemplate.java:732)
+	at org.springframework.jdbc.core.JdbcTemplate.execute(JdbcTemplate.java:658)
+	... 10 common frames omitted
+Caused by: oracle.jdbc.OracleDatabaseException: ORA-00942: table or view does not exist
+	at oracle.jdbc.driver.T4CTTIoer11.processError(T4CTTIoer11.java:513)
+	... 30 common frames omitted
+2026-10-05 03:34:24 ERROR c.m.d.s.AppServerHealthStatusServiceImpl - Exception in getAppServerHealthStatusReportForRegion method
+org.springframework.jdbc.BadSqlGrammarException: PreparedStatementCallback; bad SQL grammar [SELECT PRIMARY_SERVER_TYPE, STATUS, COUNT(node_name) AS "APPSERVERS_COUNT" ... ]
+	at com.mss.dmaas.serviceimpl.AppServerHealthStatusServiceImpl.getAppServerHealthStatusReport(AppServerHealthStatusServiceImpl.java:767)
+	at com.mss.dmaas.serviceimpl.AppServerHealthStatusServiceImpl.lambda$getCompleteDashboard$3(AppServerHealthStatusServiceImpl.java:1510)
+	... [same ORA-00942: table or view does not exist stack trace] ...
+2026-10-05 03:34:24 ERROR c.m.d.s.AppServerHealthStatusServiceImpl - Exception in getAppServerHealthStatusReportForRegion method
+org.springframework.jdbc.BadSqlGrammarException: PreparedStatementCallback; bad SQL grammar [SELECT PRIMARY_SERVER_TYPE, STATUS, COUNT(node_name) AS "APPSERVERS_COUNT" ... ]
+	at com.mss.dmaas.serviceimpl.AppServerHealthStatusServiceImpl.getAppServerHealthStatusReport(AppServerHealthStatusServiceImpl.java:767)
+	at com.mss.dmaas.serviceimpl.AppServerHealthStatusServiceImpl.lambda$getCompleteDashboard$4(AppServerHealthStatusServiceImpl.java:1519)
+	... [same ORA-00942: table or view does not exist stack trace] ...
+2026-10-05 03:56:28 ERROR c.m.d.s.DashboardStoreHealthStatusServiceImpl - Exception while fetching data for region APMEA and table EDS
+org.springframework.jdbc.BadSqlGrammarException: PreparedStatementCallback; bad SQL grammar [SELECT COALESCE(SUM(CASE WHEN UPPER(STATUS) IN ('READY','UP') THEN STORE_NUMBER_COUNT ELSE 0 END),0) AS HEALTHY_STORES, COALESCE(SUM(CASE WHEN UPPER(STATUS) IN ('PAUSED','PAUSE') THEN STORE_NUMBER_COUNT ELSE 0 END),0) AS PAUSED_COUNT, COALESCE(SUM(CASE WHEN UPPER(STATUS) IN ('NEVER_CONTACTED','SHUNNED','DOWN','NETWORK_ERROR') THEN STORE_NUMBER_COUNT ELSE 0 END),0) AS UNHEALTHY_STORES FROM VW_STORE_HEALTH_REGION WHERE REGION_CODE = ?  AND CLIENT_TYPE NOT IN ('MHO','LAB')  AND MIGRATION_STATUS NOT IN ('CLOSED','PAUSE','NEW')]
+	at org.springframework.jdbc.support.SQLExceptionSubclassTranslator.doTranslate(SQLExceptionSubclassTranslator.java:103)
+	at org.springframework.jdbc.support.AbstractFallbackSQLExceptionTranslator.translate(AbstractFallbackSQLExceptionTranslator.java:107)
+	at org.springframework.jdbc.core.JdbcTemplate.translateException(JdbcTemplate.java:1556)
+	at org.springframework.jdbc.core.JdbcTemplate.execute(JdbcTemplate.java:677)
+	at org.springframework.jdbc.core.JdbcTemplate.query(JdbcTemplate.java:723)
+	at org.springframework.jdbc.core.JdbcTemplate.query(JdbcTemplate.java:754)
+	at org.springframework.jdbc.core.JdbcTemplate.query(JdbcTemplate.java:767)
+	at org.springframework.jdbc.core.JdbcTemplate.queryForObject(JdbcTemplate.java:889)
+	at com.mss.dmaas.serviceimpl.DashboardStoreHealthStatusServiceImpl.getRegionTableCounts(DashboardStoreHealthStatusServiceImpl.java:598)
+	at com.mss.dmaas.serviceimpl.DashboardStoreHealthStatusServiceImpl.getStoreHealthStatusReportForRegionGroup(DashboardStoreHealthStatusServiceImpl.java:551)
+	at com.mss.dmaas.controller.DashboardStoreHealthStatusController.getStoreHealthStatusReportForRegionGroup(DashboardStoreHealthStatusController.java:154)
+	... [112 Spring/Security/Tomcat servlet filter frames trimmed] ...
+Caused by: java.sql.SQLSyntaxErrorException: ORA-00932: inconsistent datatypes: expected CHAR got NUMBER
+	at oracle.jdbc.driver.T4CTTIoer11.processError(T4CTTIoer11.java:509)
+	at oracle.jdbc.driver.T4CTTIoer11.processError(T4CTTIoer11.java:461)
+	at oracle.jdbc.driver.T4C8Oall.processError(T4C8Oall.java:1104)
+	at oracle.jdbc.driver.T4CTTIfun.receive(T4CTTIfun.java:553)
+	at oracle.jdbc.driver.T4CTTIfun.doRPC(T4CTTIfun.java:269)
+	at oracle.jdbc.driver.T4C8Oall.doOALL(T4C8Oall.java:655)
+	at oracle.jdbc.driver.T4CPreparedStatement.doOall8(T4CPreparedStatement.java:270)
+	at oracle.jdbc.driver.T4CPreparedStatement.doOall8(T4CPreparedStatement.java:91)
+	at oracle.jdbc.driver.T4CPreparedStatement.executeForDescribe(T4CPreparedStatement.java:807)
+	at oracle.jdbc.driver.OracleStatement.executeMaybeDescribe(OracleStatement.java:983)
+	at oracle.jdbc.driver.OracleStatement.doExecuteWithTimeout(OracleStatement.java:1168)
+	at oracle.jdbc.driver.OraclePreparedStatement.executeInternal(OraclePreparedStatement.java:3666)
+	at oracle.jdbc.driver.T4CPreparedStatement.executeInternal(T4CPreparedStatement.java:1426)
+	at oracle.jdbc.driver.OraclePreparedStatement.executeQuery(OraclePreparedStatement.java:3713)
+	at oracle.jdbc.driver.OraclePreparedStatementWrapper.executeQuery(OraclePreparedStatementWrapper.java:1167)
+	at org.springframework.jdbc.core.JdbcTemplate$1.doInPreparedStatement(JdbcTemplate.java:732)
+	at org.springframework.jdbc.core.JdbcTemplate.execute(JdbcTemplate.java:658)
+	... 122 common frames omitted
+Caused by: oracle.jdbc.OracleDatabaseException: ORA-00932: inconsistent datatypes: expected CHAR got NUMBER
+	at oracle.jdbc.driver.T4CTTIoer11.processError(T4CTTIoer11.java:513)
+	... 142 common frames omitted
+2026-10-05 03:56:32 ERROR c.m.d.s.AppServerHealthStatusServiceImpl - Exception in getAppServerHealthStatusReportForRegion method
+org.springframework.jdbc.BadSqlGrammarException: PreparedStatementCallback; bad SQL grammar [SELECT PRIMARY_SERVER_TYPE, STATUS, COUNT(node_name) AS "APPSERVERS_COUNT" ... ]
+	at com.mss.dmaas.serviceimpl.AppServerHealthStatusServiceImpl.getAppServerHealthStatusReport(AppServerHealthStatusServiceImpl.java:767)
+	at com.mss.dmaas.serviceimpl.AppServerHealthStatusServiceImpl.lambda$getCompleteDashboard$4(AppServerHealthStatusServiceImpl.java:1519)
+	... [same ORA-00942: table or view does not exist stack trace] ...
+2026-10-05 03:56:32 ERROR c.m.d.s.AppServerHealthStatusServiceImpl - Exception in getAppServerHealthStatusReportForRegion method
+org.springframework.jdbc.BadSqlGrammarException: PreparedStatementCallback; bad SQL grammar [SELECT PRIMARY_SERVER_TYPE, STATUS, COUNT(node_name) AS "APPSERVERS_COUNT" ... ]
+	at com.mss.dmaas.serviceimpl.AppServerHealthStatusServiceImpl.getAppServerHealthStatusReport(AppServerHealthStatusServiceImpl.java:767)
+	at com.mss.dmaas.serviceimpl.AppServerHealthStatusServiceImpl.lambda$getCompleteDashboard$3(AppServerHealthStatusServiceImpl.java:1510)
+	... [same ORA-00942: table or view does not exist stack trace] ...
+2026-10-05 03:56:32 ERROR c.m.d.s.AppServerHealthStatusServiceImpl - Exception in getAppServerHealthStatusReportForRegion method
+org.springframework.jdbc.BadSqlGrammarException: PreparedStatementCallback; bad SQL grammar [SELECT PRIMARY_SERVER_TYPE, STATUS, COUNT(node_name) AS "APPSERVERS_COUNT" ... ]
+	at com.mss.dmaas.serviceimpl.AppServerHealthStatusServiceImpl.getAppServerHealthStatusReport(AppServerHealthStatusServiceImpl.java:767)
+	at com.mss.dmaas.serviceimpl.AppServerHealthStatusServiceImpl.lambda$getCompleteDashboard$2(AppServerHealthStatusServiceImpl.java:1501)
+	... [same ORA-00942: table or view does not exist stack trace] ...
+2026-10-05 04:00:00 ERROR c.m.d.s.NetMapNodeServiceImpl - No Data found from DB to write in excel file
+2026-10-05 04:00:00 ERROR c.m.d.s.NetMapNodeServiceImpl - Read operation failed, Excel file is not found in location /app/ICC/portal/RegionalNetmapUpdate/netMapNodesData.xlsx
+2026-10-05 04:00:00 ERROR c.m.d.s.NetMapNodeServiceImpl - File not found to read
+2026-10-05 04:00:00 ERROR c.m.d.s.NetMapNodeServiceImpl - Failed to rename Excel File
+2026-10-05 04:00:00 ERROR c.m.d.s.NetMapNodeServiceImpl - Error while moving Excel file into the backup folder
+2026-10-05 04:32:18 ERROR c.m.d.controller.AlertsController - Error while fetching failed alerts
+org.springframework.dao.RecoverableDataAccessException: Hibernate transaction: Unable to commit against JDBC Connection; ORA-00028: your session has been killed
+ORA-02063: preceding line from L_DMSSGEUD_DMSSDCUST
+ORA-02063: preceding 2 lines from L_DMSSDCUST_DMSSGEUD
+ORA-00028: your session has been killed
+ORA-02063: preceding line from L_DMSSGAPD_DMSSDCUST
+ORA-02063: preceding 2 lines from L_DMSSDCUST_DMSSGAPD
+ORA-00028: your session has been killed
+ORA-02063: preceding line from L_DMSSGNAD_DMSSDCUST
+ORA-02063: preceding 2 lines from L_DMSSDCUST_DMSSGNAD
+
+	at org.springframework.jdbc.support.SQLExceptionSubclassTranslator.doTranslate(SQLExceptionSubclassTranslator.java:110)
+	at org.springframework.jdbc.support.AbstractFallbackSQLExceptionTranslator.translate(AbstractFallbackSQLExceptionTranslator.java:107)
+	at org.springframework.orm.jpa.vendor.HibernateJpaDialect.convertHibernateAccessException(HibernateJpaDialect.java:269)
+	at org.springframework.orm.jpa.vendor.HibernateJpaDialect.convertHibernateAccessException(HibernateJpaDialect.java:256)
+	at org.springframework.orm.jpa.vendor.HibernateJpaDialect.translateExceptionIfPossible(HibernateJpaDialect.java:241)
+	at org.springframework.orm.jpa.JpaTransactionManager.doCommit(JpaTransactionManager.java:566)
+	at org.springframework.transaction.support.AbstractPlatformTransactionManager.processCommit(AbstractPlatformTransactionManager.java:795)
+	at org.springframework.transaction.support.AbstractPlatformTransactionManager.commit(AbstractPlatformTransactionManager.java:758)
+	at org.springframework.transaction.interceptor.TransactionAspectSupport.commitTransactionAfterReturning(TransactionAspectSupport.java:698)
+	at org.springframework.transaction.interceptor.TransactionAspectSupport.invokeWithinTransaction(TransactionAspectSupport.java:416)
+	at org.springframework.transaction.interceptor.TransactionInterceptor.invoke(TransactionInterceptor.java:119)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:728)
+	at com.mss.dmaas.serviceimpl.DmaasMarketAlertsServiceImpl$$SpringCGLIB$$0.getFailedAlerts(<generated>)
+	at com.mss.dmaas.controller.AlertsController.getFailedAlerts(AlertsController.java:94)
+	... [108 Spring/Security/Tomcat servlet filter frames trimmed] ...
+Caused by: java.sql.SQLRecoverableException: ORA-00028: your session has been killed
+ORA-02063: preceding line from L_DMSSGEUD_DMSSDCUST
+ORA-02063: preceding 2 lines from L_DMSSDCUST_DMSSGEUD
+ORA-00028: your session has been killed
+ORA-02063: preceding line from L_DMSSGAPD_DMSSDCUST
+ORA-02063: preceding 2 lines from L_DMSSDCUST_DMSSGAPD
+ORA-00028: your session has been killed
+ORA-02063: preceding line from L_DMSSGNAD_DMSSDCUST
+ORA-02063: preceding 2 lines from L_DMSSDCUST_DMSSGNAD
+
+	at oracle.jdbc.driver.T4CTTIoer11.processError(T4CTTIoer11.java:509)
+	at oracle.jdbc.driver.T4CTTIoer11.processError(T4CTTIoer11.java:456)
+	at oracle.jdbc.driver.T4CTTIoer11.processError(T4CTTIoer11.java:451)
+	at oracle.jdbc.driver.T4C7Ocommoncall.processError(T4C7Ocommoncall.java:88)
+	at oracle.jdbc.driver.T4CTTIfun.receive(T4CTTIfun.java:553)
+	at oracle.jdbc.driver.T4CTTIfun.doRPC(T4CTTIfun.java:269)
+	at oracle.jdbc.driver.T4C7Ocommoncall.doOCOMMIT(T4C7Ocommoncall.java:74)
+	at oracle.jdbc.driver.T4CConnection.doCommit(T4CConnection.java:1049)
+	at oracle.jdbc.driver.PhysicalConnection.commit(PhysicalConnection.java:2202)
+	at oracle.jdbc.driver.PhysicalConnection.commit(PhysicalConnection.java:2207)
+	at org.apache.tomcat.jdbc.pool.ProxyConnection.invoke(ProxyConnection.java:166)
+	at org.apache.tomcat.jdbc.pool.JdbcInterceptor.invoke(JdbcInterceptor.java:107)
+	at org.apache.tomcat.jdbc.pool.interceptor.AbstractCreateStatementInterceptor.invoke(AbstractCreateStatementInterceptor.java:138)
+	at org.apache.tomcat.jdbc.pool.JdbcInterceptor.invoke(JdbcInterceptor.java:107)
+	at org.apache.tomcat.jdbc.pool.DisposableConnectionFacade.invoke(DisposableConnectionFacade.java:86)
+	at jdk.proxy4/jdk.proxy4.$Proxy311.commit(Unknown Source)
+	at org.hibernate.resource.jdbc.internal.AbstractLogicalConnectionImplementor.commit(AbstractLogicalConnectionImplementor.java:87)
+	at org.hibernate.resource.transaction.backend.jdbc.internal.JdbcResourceLocalTransactionCoordinatorImpl$TransactionDriverControlImpl.commit(JdbcResourceLocalTransactionCoordinatorImpl.java:268)
+	at org.hibernate.engine.transaction.internal.TransactionImpl.commit(TransactionImpl.java:101)
+	at org.springframework.orm.jpa.JpaTransactionManager.doCommit(JpaTransactionManager.java:562)
+	... 119 common frames omitted

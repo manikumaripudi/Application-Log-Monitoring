@@ -1,0 +1,15 @@
+google-adk
+litellm>=1.75.5
+google-cloud-bigquery
+google-cloud-logging
+google-auth
+pydantic
+pydantic-settings
+python-dotenv
+sqlglot
+pytest
+fastapi
+uvicorn
+azure-identity
+httpx
+paramiko>=3.4
