@@ -2,8 +2,10 @@ from pydantic_settings import BaseSettings
 from typing import Optional
 from dotenv import load_dotenv
 import os
+from pathlib import Path
 
-load_dotenv()
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+load_dotenv(PROJECT_ROOT / ".env")
 
 class Settings(BaseSettings):
     AZURE_SUBSCRIPTION_ID: Optional[str] = None
@@ -29,7 +31,9 @@ class Settings(BaseSettings):
     # Gemini / Model Settings
     GEMINI_API_KEY: Optional[str] = None
     GOOGLE_API_KEY: Optional[str] = None
-    MODEL_NAME: str = "azure/gpt-5.6-terra"
+    MODEL_NAME: str = "phi4-mini:3.8b"
+    MODEL_API_URL: Optional[str] = None
+    MODEL_API_TIMEOUT_SECONDS: int = 120
 
     WEB_SEARCH_ENABLED: bool = True
     WEB_SEARCH_MODEL: str = "gemini-2.5-flash"

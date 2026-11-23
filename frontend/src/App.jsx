@@ -8,12 +8,13 @@ function App() {
   const [activeTab, setActiveTab] = useState('logs');
   const [initialFilter, setInitialFilter] = useState(null);
 
-  const handleAnalyzeFromLiveLogs = (severity, keyword, provider = 'azure', gcpService = 'all') => {
+  const handleAnalyzeFromLiveLogs = (severity, keyword, provider = 'azure', gcpService = 'all', mockFile = '') => {
     setInitialFilter({
       severity: severity || 'ALL',
       keyword: keyword || '',
       provider: provider || 'azure',
       gcpService,
+      mockFile,
       timestamp: Date.now()
     });
     setActiveTab('agent');

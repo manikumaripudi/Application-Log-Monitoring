@@ -24,8 +24,12 @@ const SEVERITY_COLORS = {
 };
 
 const LiveLogViewer = ({ onAnalyzeWithAgent }) => {
-  const [cloudProvider, setCloudProvider] = useState('azure'); // 'azure' or 'gcp'
+  const [cloudProvider, setCloudProvider] = useState('azure');
   const [gcpService, setGcpService] = useState('all');
+  const [mockFiles, setMockFiles] = useState([]);
+  const [selectedMockFile, setSelectedMockFile] = useState('');
+  const [mockLoading, setMockLoading] = useState(false);
+  const [mockLoadError, setMockLoadError] = useState('');
   const [logs, setLogs] = useState([]);
   const [connected, setConnected] = useState(false);
   const [connecting, setConnecting] = useState(false);
@@ -48,6 +52,29 @@ const LiveLogViewer = ({ onAnalyzeWithAgent }) => {
   useEffect(() => {
     isPausedRef.current = paused;
   }, [paused]);
+
+  useEffect(() => {
+    let active = true;
+    fetch('http://127.0.0.1:5000/api/mockfiles')
+      .then((res) => {
+        if (!res.ok) throw new Error(`Mock file request failed: ${res.status}`);
+        return res.json();
+      })
+      .then((data) => {
+        if (!active) return;
+        const files = Array.isArray(data.files) ? data.files : [];
+        setMockFiles(files);
+        setSelectedMockFile((previous) => files.includes(previous) ? previous : files[0] || '');
+      })
+      .catch((error) => {
+        if (!active) return;
+        console.error('Failed to fetch mock files', error);
+        setMockLoadError(`Could not load mock files: ${error.message}`);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const scrollToBottom = useCallback(() => {
     if (autoScroll && logsEndRef.current) {
@@ -147,6 +174,12 @@ const LiveLogViewer = ({ onAnalyzeWithAgent }) => {
     setLogs([]);
     setStatus(null);
     pausedLogsRef.current = [];
+    if (cloudProvider === 'mock') {
+      disconnect();
+      setConnected(false);
+      setConnecting(false);
+      return undefined;
+    }
     connect();
     fetchStatus();
     const statusInterval = setInterval(fetchStatus, 10000);
@@ -155,6 +188,41 @@ const LiveLogViewer = ({ onAnalyzeWithAgent }) => {
       clearInterval(statusInterval);
     };
   }, [connect, disconnect, fetchStatus]);
+
+  useEffect(() => {
+    if (cloudProvider !== 'mock' || !selectedMockFile) return undefined;
+
+    const controller = new AbortController();
+    setMockLoading(true);
+    setMockLoadError('');
+    fetch(`http://127.0.0.1:5000/api/mockfiles/${encodeURIComponent(selectedMockFile)}`, {
+      signal: controller.signal,
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error(`Mock log request failed: ${res.status}`);
+        return res.json();
+      })
+      .then((data) => {
+        const lines = typeof data.content === 'string' ? data.content.split(/\r?\n/).filter((line) => line.trim()) : [];
+        setLogs(lines.map((line, index) => ({
+          id: `${selectedMockFile}-${index}`,
+          text: line,
+          severity: classifyLine(line),
+          timestamp: new Date(),
+        })));
+      })
+      .catch((error) => {
+        if (error.name === 'AbortError') return;
+        console.error('Failed to load mock log file', error);
+        setLogs([]);
+        setMockLoadError(`Could not load ${selectedMockFile}: ${error.message}`);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setMockLoading(false);
+      });
+
+    return () => controller.abort();
+  }, [cloudProvider, selectedMockFile]);
 
   // Auto-scroll when new logs arrive
   useEffect(() => {
@@ -248,7 +316,36 @@ const LiveLogViewer = ({ onAnalyzeWithAgent }) => {
               <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/></svg>
               GCP
             </button>
+            <button
+              type="button"
+              onClick={() => setCloudProvider('mock')}
+              style={{
+                padding: '0.35rem 0.85rem',
+                borderRadius: '6px',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                border: 'none',
+                cursor: 'pointer',
+                background: cloudProvider === 'mock' ? '#64748b' : 'transparent',
+                color: cloudProvider === 'mock' ? '#ffffff' : '#94a3b8',
+              }}
+              title="Load a local mock log file"
+            >
+              Mock Files
+            </button>
           </div>
+          {cloudProvider === 'mock' && (
+            <select
+              aria-label="Mock log file"
+              value={selectedMockFile}
+              onChange={(event) => setSelectedMockFile(event.target.value)}
+              disabled={mockFiles.length === 0 || mockLoading}
+            >
+              {mockFiles.length === 0
+                ? <option value="">No mock files available</option>
+                : mockFiles.map((file) => <option key={file} value={file}>{file}</option>)}
+            </select>
+          )}
           {cloudProvider === 'gcp' && (
             <select
               aria-label="GCP log service"
@@ -259,14 +356,16 @@ const LiveLogViewer = ({ onAnalyzeWithAgent }) => {
             </select>
           )}
 
-          <div className={`connection-indicator ${connected ? 'connected' : connecting ? 'connecting' : 'disconnected'}`}>
+          <div className={`connection-indicator ${cloudProvider === 'mock' ? (mockLoading ? 'connecting' : 'connected') : connected ? 'connected' : connecting ? 'connecting' : 'disconnected'}`}>
             <span className="connection-dot"></span>
             <span className="connection-label">
-              {connected && status?.connected ? 'Live' : connecting ? 'Connecting...' : connected ? 'Waiting for cloud logs' : 'Disconnected'}
+              {cloudProvider === 'mock'
+                ? mockLoading ? 'Loading mock logs...' : 'Mock file'
+                : connected && status?.connected ? 'Live' : connecting ? 'Connecting...' : connected ? 'Waiting for cloud logs' : 'Disconnected'}
             </span>
           </div>
 
-          {status && (
+          {status && cloudProvider !== 'mock' && (
             <div className="log-meta">
               <span className="meta-chip">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
@@ -316,22 +415,24 @@ const LiveLogViewer = ({ onAnalyzeWithAgent }) => {
 
           {/* Action buttons */}
           <div className="log-actions">
-            {paused ? (
-              <button className="log-action-btn resume" onClick={handleResume} title="Resume">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                Resume {pausedLogsRef.current.length > 0 ? `(${pausedLogsRef.current.length})` : ''}
-              </button>
-            ) : (
-              <button className="log-action-btn pause" onClick={handlePause} title="Pause">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-                Pause
-              </button>
+            {cloudProvider !== 'mock' && (
+              paused ? (
+                <button className="log-action-btn resume" onClick={handleResume} title="Resume">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                  Resume {pausedLogsRef.current.length > 0 ? `(${pausedLogsRef.current.length})` : ''}
+                </button>
+              ) : (
+                <button className="log-action-btn pause" onClick={handlePause} title="Pause">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                  Pause
+                </button>
+              )
             )}
             <button className="log-action-btn clear" onClick={handleClear} title="Clear">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
               Clear
             </button>
-            {!connected && !connecting && (
+            {cloudProvider !== 'mock' && !connected && !connecting && (
               <button className="log-action-btn reconnect" onClick={connect} title="Reconnect">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
                 Reconnect
@@ -340,7 +441,8 @@ const LiveLogViewer = ({ onAnalyzeWithAgent }) => {
             {onAnalyzeWithAgent && (
               <button 
                 className="log-action-btn"
-                onClick={() => onAnalyzeWithAgent(severityFilter, filter, cloudProvider, gcpService)}
+                onClick={() => onAnalyzeWithAgent(severityFilter, filter, cloudProvider, gcpService, selectedMockFile)}
+                disabled={cloudProvider === 'mock' && (mockLoading || !selectedMockFile)}
                 title="Send current filtered logs to Application Agent for deep analysis"
                 style={{
                   background: '#2368a0',
@@ -371,7 +473,9 @@ const LiveLogViewer = ({ onAnalyzeWithAgent }) => {
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.3 }}>
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
             </svg>
-            <p>{connected ? 'Waiting for logs...' : 'Not connected to log stream'}</p>
+            <p>{mockLoadError || (cloudProvider === 'mock'
+              ? mockLoading ? 'Loading mock logs...' : logs.length > 0 ? 'No log lines match the selected filters.' : selectedMockFile ? 'This mock file has no log lines.' : 'No mock files are available.'
+              : connected ? 'Waiting for logs...' : 'Not connected to log stream')}</p>
           </div>
         )}
 

@@ -1,12 +1,13 @@
 from typing import Any, Dict, Optional
 import os
 import threading
+from pathlib import Path
 from services.azure_log_stream import log_stream_service
 from services.email_service import send_alert_email
 from config.settings import settings
 from prompts import LOG_ANALYSIS_INSTRUCTION, SEVERITY_INSTRUCTION
 
-MOCK_LOG_FILE = r"C:\Users\vtangeti\Desktop\poc\backend\mockdata\app1.log"
+MOCK_LOG_FILE = Path(__file__).resolve().parents[1] / "mockdata" / "new_app.log"
 
 
 # ---------------------------------------------------------------------------
@@ -18,10 +19,7 @@ def get_recent_application_logs(minutes: Optional[int] = 10, source: Optional[st
     Retrieves the most recent application logs from Azure or GCP.
     """
     if settings.LOG_SOURCE == "mock":
-        if os.path.isfile(MOCK_LOG_FILE):
-            with open(MOCK_LOG_FILE, 'r', encoding='utf-8') as f:
-                return f.read()
-        return ""
+        return MOCK_LOG_FILE.read_text(encoding="utf-8") if MOCK_LOG_FILE.is_file() else ""
 
     if source and source.lower() == "gcp":
         from services.gcp_log_stream import gcp_log_stream_service
